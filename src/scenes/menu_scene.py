@@ -9,23 +9,30 @@ from config import (
     COLOR_YELLOW, COLOR_RED, COLOR_GIRDER, COLOR_GRAY,
 )
 
-# (表示名, シーンキー or None=準備中)
+# (表示名, シーンキー or None=準備中, サムネイルキー)
+# シーンキーが None（準備中）でも、サムネイルキーがあれば専用サムネイルを表示する。
 GAMES = [
-    ("DONKEY KONG", "donkey_kong"),
-    ("DONKEY KONG '81", "donkey_kong_81"),
-    ("TETRIS", "tetris"),
-    ("ICE CLIMBER", "ice_climber"),
-    ("PAC-MAN", None),
-    ("SPACE INVADERS", None),
+    ("DONKEY KONG", "donkey_kong", "donkey_kong"),
+    ("DONKEY KONG '81", "donkey_kong_81", "donkey_kong_81"),
+    ("TETRIS", "tetris", "tetris"),
+    ("ICE CLIMBER", "ice_climber", "ice_climber"),
+    ("PAC-MAN", None, None),
+    ("SNAKE", None, "snake"),
+    ("SPACE INVADERS", None, "space_invaders"),
+    ("BREAKOUT", None, "breakout"),
+    ("WAGYAN LAND", None, "wagyan_land"),
+    ("PINBALL", None, "pinball"),
+    ("MARIO KART", None, "mario_kart"),
 ]
 
 # グリッド設定
-COLS = 3
-CARD_W = 210
-CARD_H = 150
-GAP_X = 30
-GAP_Y = 26
-GRID_TOP = 230
+# カード枚数が増えたため 4 列に変更し、3 行で画面（600px）に収める。
+COLS = 4
+CARD_W = 178
+CARD_H = 112
+GAP_X = 16
+GAP_Y = 16
+GRID_TOP = 208
 
 
 class MenuScene(BaseScene):
@@ -90,8 +97,8 @@ class MenuScene(BaseScene):
         sub = self.font_small.render("- SELECT A GAME -", True, COLOR_WHITE)
         screen.blit(sub, sub.get_rect(center=(cx, 155)))
 
-        for i, (name, key) in enumerate(GAMES):
-            self._draw_card(screen, i, name, key)
+        for i, (name, key, thumb_key) in enumerate(GAMES):
+            self._draw_card(screen, i, name, key, thumb_key)
 
         # 操作説明（点滅）
         if int(self.time * 2) % 2 == 0:
@@ -99,14 +106,14 @@ class MenuScene(BaseScene):
                 "ARROWS: SELECT     ENTER: PLAY", True, COLOR_WHITE)
             screen.blit(hint, hint.get_rect(center=(cx, SCREEN_HEIGHT - 26)))
 
-    def _draw_card(self, screen, i, name, key):
+    def _draw_card(self, screen, i, name, key, thumb_key):
         rect = self._card_rect(i)
         selected = (i == self.selected)
         playable = key is not None
         thumb_h = CARD_H - 34  # 下部にタイトル帯
 
-        # サムネイル
-        thumb = get_thumbnail(key, (CARD_W - 8, thumb_h - 4))
+        # サムネイル（準備中でも専用サムネイルがあれば表示）
+        thumb = get_thumbnail(thumb_key, (CARD_W - 8, thumb_h - 4))
         if not playable:
             thumb = thumb.copy()
             thumb.set_alpha(150)
